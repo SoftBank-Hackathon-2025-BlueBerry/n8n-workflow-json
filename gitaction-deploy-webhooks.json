@@ -19,22 +19,6 @@
     },
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "743e6bf7-853e-4a26-9798-cd78c83e13a8",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        368,
-        2864
-      ],
-      "id": "f0d0035a-1f80-495c-9b79-573e05f47b4a",
-      "name": "Slack Deploy Webhook",
-      "webhookId": "743e6bf7-853e-4a26-9798-cd78c83e13a8"
-    },
-    {
-      "parameters": {
         "jsCode": "// Parse the Slack payload from the webhook body\nconst payload = JSON.parse($input.first().json.body.payload);\n\n// Extract the button value from the actions array\nconst buttonValue = payload.actions[0].value;\n\n// Parse the JSON string from the button value\nconst parsedData = JSON.parse(buttonValue);\n\n// Return the parsed data with image, service, and action fields\nreturn [{\n  json: {\n    action: parsedData.action,\n    image: parsedData.image,\n    service: parsedData.service\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
@@ -108,6 +92,77 @@
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09QHKALNTG",
+          "mode": "list",
+          "cachedResultName": "test-channel"
+        },
+        "text": "취소되었습니다.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        3024
+      ],
+      "id": "b98e2908-dc94-4a81-9b74-445fa865e4f2",
+      "name": "Deploy Canceled",
+      "webhookId": "60394e16-c6e5-494b-ac04-a53fa7b35637",
+      "credentials": {
+        "slackApi": {
+          "id": "28Ld5ol5ScuLQfNA",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://run.googleapis.com/v2/projects/flowing-lead-308309/locations/asia-northeast3/services/{{$json[\"service\"]}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "Content-Type: application/json",
+        "body": "={\n  \"name\": \"projects/PROJECT_ID/locations/asia-northeast3/services/sample-api\",\n  \"description\": \"Sample service deployed via REST API\",\n  \"labels\": {\n    \"env\": \"prod\",\n    \"team\": \"platform\"\n  },\n  \"ingress\": \"INGRESS_TRAFFIC_ALL\",\n  \"template\": {\n    \"containers\": [\n      {\n        \"image\": \"{{$json[\"image\"]}}\",\n        \"env\": [\n          {\n            \"name\": \"ENV\",\n            \"value\": \"prod\"\n          }\n        ],\n        \"resources\": {\n          \"limits\": {\n            \"cpu\": \"1\",\n            \"memory\": \"512Mi\"\n          }\n        }\n      }\n    ],\n    \"timeout\": \"300s\",\n    \"serviceAccount\": \"my-run-sa@PROJECT_ID.iam.gserviceaccount.com\"\n  },\n  \"traffic\": [\n    {\n      \"percent\": 100,\n      \"latestRevision\": true\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1072,
+        2768
+      ],
+      "id": "d3c4d66b-3631-4bf5-a49a-8f494dc9dd9d",
+      "name": "GCP Cloud Run RESTAPI",
+      "credentials": {
+        "googleApi": {
+          "id": "0gUZv9mgkR72O1Ne",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "743e6bf7-853e-4a26-9798-cd78c83e13a8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        2864
+      ],
+      "id": "f0d0035a-1f80-495c-9b79-573e05f47b4a",
+      "name": "Slack Interactive Webhook",
+      "webhookId": "743e6bf7-853e-4a26-9798-cd78c83e13a8"
     }
   ],
   "pinData": {},
@@ -117,17 +172,6 @@
         [
           {
             "node": "send msg with buttons",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Slack Deploy Webhook": {
-      "main": [
-        [
-          {
-            "node": "Values: action, image, service",
             "type": "main",
             "index": 0
           }
@@ -144,13 +188,42 @@
           }
         ]
       ]
+    },
+    "If deploy": {
+      "main": [
+        [
+          {
+            "node": "GCP Cloud Run RESTAPI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deploy Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Interactive Webhook": {
+      "main": [
+        [
+          {
+            "node": "Values: action, image, service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "809181cb-9f58-4447-bc78-cf61690a60bf",
+  "versionId": "0b475be8-226b-417e-9704-981e7d3b73f9",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f118d8e9e9bca66583b47d1d562fe0913f4429ba6d53b56d4487013c536bf0d1"
