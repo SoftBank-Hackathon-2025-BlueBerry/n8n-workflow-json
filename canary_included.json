@@ -1,0 +1,335 @@
+{
+  "name": "canary_included",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://run.googleapis.com/v2/projects/flowing-lead-308309/locations/asia-northeast3/services/{{$json[\"service\"]}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "Content-Type: application/json",
+        "body": "={\n  \"name\": \"projects/PROJECT_ID/locations/asia-northeast3/services/sample-api\",\n  \"description\": \"Sample service deployed via REST API\",\n  \"labels\": {\n    \"env\": \"prod\",\n    \"team\": \"platform\"\n  },\n  \"ingress\": \"INGRESS_TRAFFIC_ALL\",\n  \"template\": {\n    \"containers\": [\n      {\n        \"image\": \"{{$json[\"image\"]}}\",\n        \"env\": [\n          {\n            \"name\": \"ENV\",\n            \"value\": \"prod\"\n          }\n        ],\n        \"resources\": {\n          \"limits\": {\n            \"cpu\": \"1\",\n            \"memory\": \"512Mi\"\n          }\n        }\n      }\n    ],\n    \"timeout\": \"300s\",\n    \"serviceAccount\": \"my-run-sa@PROJECT_ID.iam.gserviceaccount.com\"\n  },\n  \"traffic\": [\n    {\n      \"percent\": 100,\n      \"latestRevision\": true\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        688,
+        48
+      ],
+      "id": "3e0cd837-1648-4695-8560-efb9858eb31c",
+      "name": "GCP Cloud Run RESTAPI",
+      "credentials": {
+        "googleApi": {
+          "id": "0gUZv9mgkR72O1Ne",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        688,
+        224
+      ],
+      "id": "725c356b-8521-4c45-85ee-f09b45b87cad",
+      "name": "Cloud Deploy Release API"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        224
+      ],
+      "id": "36120000-108e-4b75-8aee-87f005d3d2bb",
+      "name": "Cloud Deploy Advance API"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09QHKALNTG",
+          "mode": "list",
+          "cachedResultName": "test-channel"
+        },
+        "text": "취소되었습니다.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        432
+      ],
+      "id": "3501a1f9-7c01-40a8-b4c0-23f28f255d8a",
+      "name": "Deploy Canceled",
+      "webhookId": "60394e16-c6e5-494b-ac04-a53fa7b35637",
+      "credentials": {
+        "slackApi": {
+          "id": "28Ld5ol5ScuLQfNA",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09QHKALNTG",
+          "mode": "list",
+          "cachedResultName": "test-channel"
+        },
+        "messageType": "block",
+        "blocksUi": "={\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"배포할 새 이미지가 있습니다:\\n*{{ $json.body.image }}*\\n 배포하시겠습니까?\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"actions\",\n\t\t\t\"elements\": [\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"button\",\n\t\t\t\t\t\"text\": {\n\t\t\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\t\t\"emoji\": true,\n\t\t\t\t\t\t\"text\": \"배포\"\n\t\t\t\t\t},\n\t\t\t\t\t\"style\": \"primary\",\n\t\t\t\t\t\"value\": \"{\\\"action\\\":\\\"deploy\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"button\",\n\t\t\t\t\t\"text\": {\n\t\t\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\t\t\"emoji\": true,\n\t\t\t\t\t\t\"text\": \"카나리 배포\"\n\t\t\t\t\t},\n\t\t\t\t\t\"style\": \"primary\",\n\t\t\t\t\t\"value\": \"{\\\"action\\\":\\\"canary\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"type\": \"button\",\n\t\t\t\t\t\"text\": {\n\t\t\t\t\t\t\"type\": \"plain_text\",\n\t\t\t\t\t\t\"emoji\": true,\n\t\t\t\t\t\t\"text\": \"취소\"\n\t\t\t\t\t},\n\t\t\t\t\t\"style\": \"danger\",\n\t\t\t\t\t\"value\": \"{\\\"action\\\":\\\"cancel\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "ac0b91ae-4a63-4a7e-a61a-94a9cee0cac5",
+      "name": "Slack Deploy Message",
+      "webhookId": "b85e8545-c381-4826-88f2-c9e0373b446c",
+      "credentials": {
+        "slackApi": {
+          "id": "28Ld5ol5ScuLQfNA",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the Slack payload from the webhook body\nconst payload = JSON.parse($input.first().json.body.payload);\n\n// Extract the button value from the actions array\nconst buttonValue = payload.actions[0].value;\n\n// Parse the JSON string from the button value\nconst parsedData = JSON.parse(buttonValue);\n\n// Return the parsed data with image, service, and action fields\nreturn [{\n  json: {\n    action: parsedData.action,\n    image: parsedData.image,\n    service: parsedData.service\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        224
+      ],
+      "id": "c3a2ca6c-7cce-4c0d-850e-8d05cc01e8bb",
+      "name": "Extract Values"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "deploy",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dcc08d95-97c9-40f6-af20-b4370f49a7d9"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "deploy"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "41f98e74-356f-42ba-a533-43dd2e63dbb2",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "canary",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "canary"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "db649fd9-41df-4674-8e22-8762811982e7",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancel"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        416,
+        208
+      ],
+      "id": "57d04f68-6950-43a1-8b2e-19364fac96cf",
+      "name": "Route"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc3c9eb3-5798-43f0-845e-90e7765c5091",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cabc01a4-c171-4f18-a388-037d9c2dbee2",
+      "name": "Pub/Sub Webhook",
+      "webhookId": "bc3c9eb3-5798-43f0-845e-90e7765c5091"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "743e6bf7-853e-4a26-9798-cd78c83e13a8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        224
+      ],
+      "id": "27710d49-e620-4680-9518-96a2ae3b927b",
+      "name": "Slack Interactive Webhook",
+      "webhookId": "743e6bf7-853e-4a26-9798-cd78c83e13a8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cloud Deploy Release API": {
+      "main": [
+        [
+          {
+            "node": "Cloud Deploy Advance API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Values": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "GCP Cloud Run RESTAPI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cloud Deploy Release API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deploy Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pub/Sub Webhook": {
+      "main": [
+        [
+          {
+            "node": "Slack Deploy Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Interactive Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a2bb7ad9-ba76-453c-805e-cbc4d0b8d8e0",
+  "meta": {
+    "instanceId": "f118d8e9e9bca66583b47d1d562fe0913f4429ba6d53b56d4487013c536bf0d1"
+  },
+  "id": "b2WB1TDMIEoymWGi",
+  "tags": []
+}
