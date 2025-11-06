@@ -1,5 +1,5 @@
 {
-  "name": "gitaction-deploy-webhooks",
+  "name": "deploy-webhooks",
   "nodes": [
     {
       "parameters": {
@@ -74,7 +74,7 @@
           "cachedResultName": "test-channel"
         },
         "messageType": "block",
-        "blocksUi": "={ \"text\": \"새 이미지가 빌드되었습니다.\", \"blocks\": [ { \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"*✅ Artifact Registry 업로드 완료!*\\n배포하시겠습니까?\" } }, { \"type\": \"actions\", \"elements\": [ { \"type\": \"button\", \"text\": { \"type\": \"plain_text\", \"text\": \"🚀 배포하기\" }, \"style\": \"primary\", \"value\": \"{\\\"action\\\":\\\"deploy\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\" }, { \"type\": \"button\", \"text\": { \"type\": \"plain_text\", \"text\": \"🛑 취소\" }, \"style\": \"danger\", \"value\": \"cancel\" } ] } ] }",
+        "blocksUi": "={ \"text\": \"새 이미지가 빌드되었습니다.\", \"blocks\": [ { \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"*✅ Artifact Registry 업로드 완료!*\\n배포하시겠습니까?\" } }, { \"type\": \"actions\", \"elements\": [ { \"type\": \"button\", \"text\": { \"type\": \"plain_text\", \"text\": \"🚀 배포하기\" }, \"style\": \"primary\", \n\"value\": \"{\\\"action\\\":\\\"deploy\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\" }, \n{ \"type\": \"button\", \n\"text\": { \"type\": \"plain_text\", \"text\": \"🛑 취소\" }, \n\"style\": \"danger\", \n\"value\": \"{\\\"action\\\":\\\"cancel\\\",\\\"image\\\":\\\"{{ $json.body.image }}\\\",\\\"service\\\":\\\"{{ $json.body.service }}\\\"}\" } ] } ] }",
         "otherOptions": {}
       },
       "type": "n8n-nodes-base.slack",
@@ -123,6 +123,22 @@
     },
     {
       "parameters": {
+        "httpMethod": "POST",
+        "path": "743e6bf7-853e-4a26-9798-cd78c83e13a8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        2960
+      ],
+      "id": "52da1c21-0a77-4b5f-a703-e8d5e0f2f163",
+      "name": "Slack Interactive Webhook1",
+      "webhookId": "743e6bf7-853e-4a26-9798-cd78c83e13a8"
+    },
+    {
+      "parameters": {
         "method": "PATCH",
         "url": "=https://run.googleapis.com/v2/projects/flowing-lead-308309/locations/asia-northeast3/services/{{$json[\"service\"]}}",
         "authentication": "predefinedCredentialType",
@@ -140,29 +156,13 @@
         2864
       ],
       "id": "c5d29291-ea42-4cfc-bd24-6387eff18671",
-      "name": "GCP Cloud Run RESTAPI1",
+      "name": "GCP Cloud Run RESTAPI",
       "credentials": {
         "googleApi": {
           "id": "0gUZv9mgkR72O1Ne",
           "name": "Google Service Account account"
         }
       }
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "743e6bf7-853e-4a26-9798-cd78c83e13a8",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        1440,
-        2960
-      ],
-      "id": "52da1c21-0a77-4b5f-a703-e8d5e0f2f163",
-      "name": "Slack Interactive Webhook1",
-      "webhookId": "743e6bf7-853e-4a26-9798-cd78c83e13a8"
     }
   ],
   "pinData": {},
@@ -193,7 +193,7 @@
       "main": [
         [
           {
-            "node": "GCP Cloud Run RESTAPI1",
+            "node": "GCP Cloud Run RESTAPI",
             "type": "main",
             "index": 0
           }
@@ -223,7 +223,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "001612c5-06e4-46cc-b360-591a6398b262",
+  "versionId": "9a51d566-473e-46a8-b098-2711e63994b8",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f118d8e9e9bca66583b47d1d562fe0913f4429ba6d53b56d4487013c536bf0d1"
